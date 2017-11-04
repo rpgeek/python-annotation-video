@@ -15,19 +15,16 @@ import json
 
 
 class VideoEvtWidget(QtGui.QWidget):
-    def __init__(self, videoEventModel):
+    def __init__(self, vid_evt_mdl):
         QtGui.QWidget.__init__(self)
-        self.label = QtGui.QLabel(videoEventModel.get_description())
+        self.label = QtGui.QLabel(vid_evt_mdl.get_description())
         layout = QtGui.QHBoxLayout()
         layout.addWidget(self.label)
         self.setLayout(layout)
 
-    def remove_model(self):
-        print('controller removing model from dict')
 
-
-def showVideoAlert(layout, info="Video Error",
-                   defaultResponse="There is no video resource to analyze"):
+def show_video_alert(layout, info="Video Error",
+                     defaultResponse="There is no video resource to analyze"):
     QtGui.QMessageBox.about(layout, info, defaultResponse)
 
 
@@ -42,31 +39,31 @@ class VideoEventsMenu(QtGui.QWidget):
         self.resource = QtGui.QPushButton("Resource")
         self.serialize = QtGui.QPushButton("Serialize")
 
-        self.startLab = QtGui.QLabel("Start: ")
+        self.start_lab = QtGui.QLabel("Start: ")
 
-        self.startLab.setMaximumHeight(20)
-        self.stopLab = QtGui.QLabel("Stop: ")
-        self.posLab = QtGui.QLabel("Pos: ")
-        self.posLab.setMaximumHeight(20)
-        self.resLab = QtGui.QLabel("Res: ")
+        self.start_lab.setMaximumHeight(20)
+        self.stop_lab = QtGui.QLabel("Stop: ")
+        self.pos_lab = QtGui.QLabel("Pos: ")
+        self.pos_lab.setMaximumHeight(20)
+        self.res_lab = QtGui.QLabel("Res: ")
 
-        self.eventLayout = QtGui.QGridLayout()
-        self.eventLayout.setAlignment(QtCore.Qt.AlignTop)
+        self.evt_layout = QtGui.QGridLayout()
+        self.evt_layout.setAlignment(QtCore.Qt.AlignTop)
 
         self.layout = QtGui.QVBoxLayout()
         self.layout.setAlignment(QtCore.Qt.AlignTop)
 
-        self.eventLayout.addWidget(self.start, 0, 0)
-        self.eventLayout.addWidget(self.stop, 0, 1)
-        self.eventLayout.addWidget(self.resource, 0, 2)
-        self.eventLayout.addWidget(self.add, 1, 0)
-        self.eventLayout.addWidget(self.serialize, 1, 1)
-        self.eventLayout.addWidget(self.startLab, 2, 0)
-        self.eventLayout.addWidget(self.stopLab, 2, 1)
-        self.eventLayout.addWidget(self.posLab, 2, 2)
-        self.eventLayout.addWidget(self.resLab, 3, 0)
+        self.evt_layout.addWidget(self.start, 0, 0)
+        self.evt_layout.addWidget(self.stop, 0, 1)
+        self.evt_layout.addWidget(self.resource, 0, 2)
+        self.evt_layout.addWidget(self.add, 1, 0)
+        self.evt_layout.addWidget(self.serialize, 1, 1)
+        self.evt_layout.addWidget(self.start_lab, 2, 0)
+        self.evt_layout.addWidget(self.stop_lab, 2, 1)
+        self.evt_layout.addWidget(self.pos_lab, 2, 2)
+        self.evt_layout.addWidget(self.res_lab, 3, 0)
 
-        self.layout.addLayout(self.eventLayout)
+        self.layout.addLayout(self.evt_layout)
         self.setLayout(self.layout)
 
         self.connect(self.add,
@@ -102,7 +99,7 @@ class VideoEventsMenu(QtGui.QWidget):
 
     def serializeAction(self):
         if not self.player_vlc:
-            showVideoAlert(self)
+            show_video_alert(self)
             return
 
         if len(self.models_list) == 0:
@@ -145,46 +142,46 @@ class VideoEventsMenu(QtGui.QWidget):
 
     def getPos(self):
         if not self.player_vlc:
-            showVideoAlert(self)
+            show_video_alert(self)
             return
         if self.playerFacadeRef:
             self.posx, self.posy = self.playerFacadeRef.lastPos
             print('menu pos ', self.posx, self.posy)
-            self.posLab.setText("Pos: " + str((self.posx, self.posy)))
+            self.pos_lab.setText("Pos: " + str((self.posx, self.posy)))
 
     def setstop(self):
         print('set stop')
         if not self.player_vlc:
-            showVideoAlert(self)
+            show_video_alert(self)
             return
         if self.player_vlc.get_time() == -1:
             self.stoptime = 0
         else:
             self.stoptime = self.player_vlc.get_time()
-        self.stopLab.setText("Stop: " + str(self.stoptime))
+        self.stop_lab.setText("Stop: " + str(self.stoptime))
 
     def setstart(self):
         print('set start')
         if not self.player_vlc:
-            showVideoAlert(self)
+            show_video_alert(self)
             return
         if self.player_vlc.get_time() == -1:
             self.starttime = 0
         else:
             self.starttime = self.player_vlc.get_time()
 
-        self.startLab.setText("Start: " + str(self.starttime))
+        self.start_lab.setText("Start: " + str(self.starttime))
 
     def setres(self):
         if not self.player_vlc:
-            showVideoAlert(self)
+            show_video_alert(self)
             return
         print('set res')
         dir = os.getcwd()
         fnamedir = QtGui.QFileDialog.\
             getOpenFileName(self, 'Open file', dir)
 
-        if len(fnamedir) == 0:
+        if fnamedir == 0:
             return
 
         name = fnamedir.split('/')[-1]
@@ -204,7 +201,7 @@ class VideoEventsMenu(QtGui.QWidget):
 
         copyfile(fnamedir, diroutresources + "/" + name)
         self.resname = name
-        self.resLab.setText("Res: " + str(self.resname))
+        self.res_lab.setText("Res: " + str(self.resname))
 
     def addVideoEvent(self):
         if not self.resname or not self.starttime or not self.stoptime:
@@ -254,10 +251,10 @@ class VideoEventsMenu(QtGui.QWidget):
         boxref.deleteLater()
 
     def cleanLabels(self):
-        self.startLab.setText("Start: ")
-        self.stopLab.setText("Stop: ")
-        self.posLab.setText("Pos: ")
-        self.resLab.setText("Res: ")
+        self.start_lab.setText("Start: ")
+        self.stop_lab.setText("Stop: ")
+        self.pos_lab.setText("Pos: ")
+        self.res_lab.setText("Res: ")
 
 
 class VideoFrame(QtGui.QWidget):
@@ -289,10 +286,10 @@ class VideoFrame(QtGui.QWidget):
         self.lastPos = self.player_vlc.video_get_cursor()
         print('last pos ', self.lastPos)
 
-        self.pixelSelect(self.player_vlc.video_get_cursor())
+        self.pxl_select(self.player_vlc.video_get_cursor())
         self.video_side_menu.getPos()
 
-    def pixelSelect(self, eventpos):
+    def pxl_select(self, eventpos):
         print('pixel select')
         painter = QtGui.QPainter(self.image)
         painter.setPen(QtGui.QPen(QtCore.Qt.red, 55,
@@ -316,13 +313,13 @@ class Player(QtGui.QMainWindow):
         self.instance = vlc.Instance("--no-xlib")
         self.mediaplayer = self.instance.media_player_new()
 
-        self.createUI()
+        self.create_ui()
         self.isPaused = False
 
     def clicked(self, clicked):
         print('clicked ', str(clicked))
 
-    def createUI(self):
+    def create_ui(self):
         """Set up the user interface, signals & slots
         """
         self.widget = QtGui.QWidget(self)
