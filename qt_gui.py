@@ -1,17 +1,15 @@
 #! /usr/bin/python
 
 from __future__ import print_function
-
-from __future__ import absolute_import
 import sys
 import os.path
-import vlc
 from PyQt4 import QtGui, QtCore
-from .VideoEvents import controller
-from .VideoEvents import model as mdl
+from VideoEvents.model import VideoEventModel
+from VideoEvents.controller import VideoEventsController
 import random
 from shutil import copyfile
 import json
+import vlc
 
 
 class VideoEvtWidget(QtGui.QWidget):
@@ -34,7 +32,7 @@ class VideoEventsMenu(QtGui.QWidget):
         self.controller = eventsController
 
         self.start = QtGui.QPushButton("Start")
-        self.stop = QtGui.QPushButton("Stop")
+        self.stop = QtGui.QPushButton("stop_player")
         self.add = QtGui.QPushButton("Add")
         self.resource = QtGui.QPushButton("Resource")
         self.serialize = QtGui.QPushButton("Serialize")
@@ -42,7 +40,7 @@ class VideoEventsMenu(QtGui.QWidget):
         self.start_lab = QtGui.QLabel("Start: ")
 
         self.start_lab.setMaximumHeight(20)
-        self.stop_lab = QtGui.QLabel("Stop: ")
+        self.stop_lab = QtGui.QLabel("stop_player: ")
         self.pos_lab = QtGui.QLabel("Pos: ")
         self.pos_lab.setMaximumHeight(20)
         self.res_lab = QtGui.QLabel("Res: ")
@@ -130,10 +128,10 @@ class VideoEventsMenu(QtGui.QWidget):
             print('saving to ', self.outdir + '/resources/' + name)
             copyfile(dir, self.outdir + '/resources/' + name)
 
-    def pass_player_ref(self, playerRef, facadePlayer):
+    def pass_player_ref(self, player_ref, facade_player):
         print('menu player - passed ref')
-        self.player_vlc = playerRef
-        self.playerFacadeRef = facadePlayer
+        self.player_vlc = player_ref
+        self.playerFacadeRef = facade_player
 
     def set_file_outputs_names(self, filename):
         self.video_name = filename
@@ -158,7 +156,7 @@ class VideoEventsMenu(QtGui.QWidget):
             self.stoptime = 0
         else:
             self.stoptime = self.player_vlc.get_time()
-        self.stop_lab.setText("Stop: " + str(self.stoptime))
+        self.stop_lab.setText("stop_player: " + str(self.stoptime))
 
     def setstart(self):
         print('set start')
@@ -223,7 +221,7 @@ class VideoEventsMenu(QtGui.QWidget):
         model = mdl.VideoEventModel(id, self.starttime,
                                     self.stoptime, self.posx,
                                     self.posy, type, str(self.resname))
-        self.controller.addModel(model)
+        self.controller.add_model(model)
         self.models_list.append(model)
 
         video_evt_widget = VideoEvtWidget(model)
@@ -246,13 +244,13 @@ class VideoEventsMenu(QtGui.QWidget):
 
     def button_pushed(self, num, boxref):
         print('Pushed button {}'.format(num))
-        self.controller.removeModel(num)
+        self.controller.remove_model(num)
         self.layout.removeWidget(boxref)
         boxref.deleteLater()
 
     def cleanLabels(self):
         self.start_lab.setText("Start: ")
-        self.stop_lab.setText("Stop: ")
+        self.stop_lab.setText("stop_player: ")
         self.pos_lab.setText("Pos: ")
         self.res_lab.setText("Res: ")
 
@@ -327,24 +325,24 @@ class Player(QtGui.QMainWindow):
 
         # In this widget, the video will be drawn
         if sys.platform == "darwin":  # for MacOS
-            self.videoframe = QtGui.QMacCocoaViewContainer(0)
+            self.video_frame = QtGui.QMacCocoaViewContainer(0)
         else:
 
-            self.videoframe = VideoFrame()
+            self.video_frame = VideoFrame()
         # self.connect(self.videoframe, QtCore.SIGNAL("clicked()"),
         #                  self.clicked)
 
-        self.palette = self.videoframe.palette()
+        self.palette = self.video_frame.palette()
         self.palette.setColor(QtGui.QPalette.Window,
                               QtGui.QColor(0, 0, 0))
-        self.videoframe.setPalette(self.palette)
-        self.videoframe.setAutoFillBackground(True)
+        self.video_frame.setPalette(self.palette)
+        self.video_frame.setAutoFillBackground(True)
 
         self.positionslider = QtGui.QSlider(QtCore.Qt.Horizontal, self)
         self.positionslider.setToolTip("Position")
         self.positionslider.setMaximum(1000)
         self.connect(self.positionslider,
-                     QtCore.SIGNAL("sliderMoved(int)"), self.setPosition)
+                     QtCore.SIGNAL("sliderMoved(int)"), self.set_position)
 
         self.hbuttonbox = QtGui.QHBoxLayout()
         self.playbutton = QtGui.QPushButton("Play")
@@ -352,10 +350,10 @@ class Player(QtGui.QMainWindow):
         self.connect(self.playbutton, QtCore.SIGNAL("clicked()"),
                      self.PlayPause)
 
-        self.stopbutton = QtGui.QPushButton("Stop")
+        self.stopbutton = QtGui.QPushButton("stop_player")
         self.hbuttonbox.addWidget(self.stopbutton)
         self.connect(self.stopbutton, QtCore.SIGNAL("clicked()"),
-                     self.Stop)
+                     self.stop_player)
 
         self.hbuttonbox.addStretch(1)
         self.volumeslider = QtGui.QSlider(QtCore.Qt.Horizontal, self)
@@ -367,25 +365,25 @@ class Player(QtGui.QMainWindow):
                      QtCore.SIGNAL("valueChanged(int)"),
                      self.setVolume)
 
-        self.vboxlayout = QtGui.QVBoxLayout()
-        self.vboxlayout.addWidget(self.videoframe)
-        self.vboxlayout.addWidget(self.positionslider)
-        self.vboxlayout.addLayout(self.hbuttonbox)
+        self.vbox_layout = QtGui.QVBoxLayout()
+        self.vbox_layout.addWidget(self.video_frame)
+        self.vbox_layout.addWidget(self.positionslider)
+        self.vbox_layout.addLayout(self.hbuttonbox)
 
-        self.controller = controller.VideoEventsController()
+        self.controller = VideoEventsController()
 
         self.sideeventmenu = VideoEventsMenu(self.controller)
 
-        self.hboxlayout = QtGui.QHBoxLayout(self)
-        self.hboxlayout.addLayout(self.vboxlayout)
-        self.hboxlayout.addWidget(self.sideeventmenu)
+        self.hbox_layout = QtGui.QHBoxLayout(self)
+        self.hbox_layout.addLayout(self.vbox_layout)
+        self.hbox_layout.addWidget(self.sideeventmenu)
         #
-        self.widget.setLayout(self.hboxlayout)
+        self.widget.setLayout(self.hbox_layout)
 
         # self.widget.setLayout(self.vboxlayout)
 
         open = QtGui.QAction("&Open", self)
-        self.connect(open, QtCore.SIGNAL("triggered()"), self.OpenFile)
+        self.connect(open, QtCore.SIGNAL("triggered()"), self.open_file)
 
         exit = QtGui.QAction("&Exit", self)
         self.connect(exit, QtCore.SIGNAL("triggered()"), sys.exit)
@@ -398,7 +396,7 @@ class Player(QtGui.QMainWindow):
         self.timer = QtCore.QTimer(self)
         self.timer.setInterval(200)
         self.connect(self.timer, QtCore.SIGNAL("timeout()"),
-                     self.updateUI)
+                     self.update_ui)
 
     def PlayPause(self):
         """Toggle play/pause status
@@ -409,20 +407,20 @@ class Player(QtGui.QMainWindow):
             self.isPaused = True
         else:
             if self.mediaplayer.play() == -1:
-                self.OpenFile()
+                self.open_file()
                 return
             self.mediaplayer.play()
             self.playbutton.setText("Pause")
             self.timer.start()
             self.isPaused = False
 
-    def Stop(self):
-        """Stop player
+    def stop_player(self):
+        """stop_player player
         """
         self.mediaplayer.stop()
         self.playbutton.setText("Play")
 
-    def SaveFile(self, filename=None):
+    def save_file(self, filename=None):
         """Open a media file in a MediaPlayer
         """
         if filename is None:
@@ -431,7 +429,7 @@ class Player(QtGui.QMainWindow):
         if not filename:
             return
 
-    def OpenFile(self, filename=None):
+    def open_file(self, filename=None):
         """Open a media file in a MediaPlayer
         """
         if filename is None:
@@ -461,25 +459,25 @@ class Player(QtGui.QMainWindow):
         # you have to give the id of the QFrame (or similar object) to
         # vlc, different platforms have different functions for this
         if sys.platform.startswith('linux'):  # for Linux using the X Server
-            self.mediaplayer.set_xwindow(self.videoframe.winId())
+            self.mediaplayer.set_xwindow(self.video_frame.winId())
         elif sys.platform == "win32":  # for Windows
-            self.mediaplayer.set_hwnd(self.videoframe.winId())
+            self.mediaplayer.set_hwnd(self.video_frame.winId())
         elif sys.platform == "darwin":  # for MacOS
-            self.mediaplayer.set_nsobject(self.videoframe.winId())
+            self.mediaplayer.set_nsobject(self.video_frame.winId())
         self.PlayPause()
 
-        self.videoframe.pass_player_ref(self.mediaplayer)
-        self.sideeventmenu.pass_player_ref(self.mediaplayer, self.videoframe)
+        self.video_frame.pass_player_ref(self.mediaplayer)
+        self.sideeventmenu.pass_player_ref(self.mediaplayer, self.video_frame)
         self.sideeventmenu.set_file_outputs_names(diroutresources)
 
-        self.videoframe.pass_menu_ref(self.sideeventmenu)
+        self.video_frame.pass_menu_ref(self.sideeventmenu)
 
     def setVolume(self, Volume):
         """Set the volume
         """
         self.mediaplayer.audio_set_volume(Volume)
 
-    def setPosition(self, position):
+    def set_position(self, position):
         """Set the position
         """
         # setting the position to where the slider was dragged
@@ -489,7 +487,7 @@ class Player(QtGui.QMainWindow):
         # factor, the more precise are the results
         # (1000 should be enough)
 
-    def updateUI(self):
+    def update_ui(self):
         """updates the user interface"""
         # setting the slider to the desired position
         self.positionslider.setValue(self.mediaplayer.get_position() * 1000)
@@ -501,12 +499,12 @@ class Player(QtGui.QMainWindow):
                 # after the video finished, the play button stills shows
                 # "Pause", not the desired behavior of a media player
                 # this will fix it
-                self.Stop()
+                self.stop_player()
 
 
 if __name__ == "__main__":
-    app = QtGui.QApplication(sys.argv)
-    player = Player()
-    player.show()
-    player.resize(640, 480)
-sys.exit(app.exec_())
+    APP = QtGui.QApplication(sys.argv)
+    PLAYER = Player()
+    PLAYER.show()
+    PLAYER.resize(640, 480)
+    sys.exit(APP.exec_())
