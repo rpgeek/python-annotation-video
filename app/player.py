@@ -36,7 +36,7 @@ class VideoFrame(QtGui.QWidget):
         print('last pos ', self.last_poz)
 
         self.pxl_select(self.player_vlc.video_get_cursor())
-        self.video_side_menu.get_pos()
+        self.video_side_menu.update_pos()
 
     def pxl_select(self, eventpos):
         print('pixel select')
@@ -62,13 +62,13 @@ class Player(QtGui.QMainWindow):
         self.instance = vlc.Instance("--no-xlib")
         self.mediaplayer = self.instance.media_player_new()
 
-        self.create_ui()
+        self.__create_ui()
         self.isPaused = False
 
     def clicked(self, clicked):
         print('clicked ', str(clicked))
 
-    def create_ui(self):
+    def __create_ui(self):
         """Set up the user interface, signals & slots
         """
         self.widget = QtGui.QWidget(self)
@@ -175,7 +175,7 @@ class Player(QtGui.QMainWindow):
         """Open a media file in a MediaPlayer
         """
         if filename is None:
-            filename = QtGui.QFileDialog.\
+            filename = QtGui.QFileDialog. \
                 getOpenFileName(self, "Open File", os.path.expanduser('~'))
         if not filename:
             return

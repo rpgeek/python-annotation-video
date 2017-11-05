@@ -9,7 +9,7 @@ from model import VideoEventModel
 class VideoEvtWidget(QtGui.QWidget):
     def __init__(self, vid_evt_mdl):
         QtGui.QWidget.__init__(self)
-        self.label = QtGui.QLabel(vid_evt_mdl.get_description())
+        self.label = QtGui.QLabel(vid_evt_mdl.get_description)
         layout = QtGui.QHBoxLayout()
         layout.addWidget(self.label)
         self.setLayout(layout)
@@ -17,6 +17,12 @@ class VideoEvtWidget(QtGui.QWidget):
 
 def show_video_alert(layout, info="Video Error",
                      default_resp="There is no video resource to analyze"):
+    """
+    Showing video alert function
+    :param layout:
+    :param info: String info
+    :param default_resp: String response
+    """
     QtGui.QMessageBox.about(layout, info, default_resp)
 
 
@@ -90,6 +96,10 @@ class VideoEventsMenu(QtGui.QWidget):
             os.makedirs(self.outdir)
 
     def serialize_action(self):
+        """
+        Serialization for events
+        :return: None
+        """
         if not self.player_vlc:
             show_video_alert(self)
             return
@@ -123,6 +133,11 @@ class VideoEventsMenu(QtGui.QWidget):
             copyfile(dir, self.outdir + '/resources/' + name)
 
     def pass_player_ref(self, player_ref, facade_player):
+        """
+        Passing player ref and facade player
+        :param player_ref:
+        :param facade_player:
+        """
         print('menu player - passed ref')
         self.player_vlc = player_ref
         self.player_facade = facade_player
@@ -132,7 +147,11 @@ class VideoEventsMenu(QtGui.QWidget):
         self.opened_file_dir = filename.split('.')[-2]
         print('opened file dir ', self.opened_file_dir)
 
-    def get_pos(self):
+    def update_pos(self):
+        """
+        Update position from player_facade
+        :return:
+        """
         if not self.player_vlc:
             show_video_alert(self)
             return
@@ -142,6 +161,10 @@ class VideoEventsMenu(QtGui.QWidget):
             self.pos_lab.setText("Pos: " + str((self.posx, self.posy)))
 
     def set_stop(self):
+        """
+        Setting stop time
+        :return: None
+        """
         print('set stop')
         if not self.player_vlc:
             show_video_alert(self)
@@ -153,6 +176,10 @@ class VideoEventsMenu(QtGui.QWidget):
         self.stop_lab.setText("stop_player: " + str(self.stoptime))
 
     def set_start(self):
+        """
+        Setting start time
+        :return:
+        """
         print('set start')
         if not self.player_vlc:
             show_video_alert(self)
@@ -165,6 +192,10 @@ class VideoEventsMenu(QtGui.QWidget):
         self.start_lab.setText("Start: " + str(self.start_time))
 
     def set_res(self):
+        """
+        Setting data resource file
+        :return:
+        """
         if not self.player_vlc:
             show_video_alert(self)
             return
@@ -196,6 +227,10 @@ class VideoEventsMenu(QtGui.QWidget):
         self.res_lab.setText("Res: " + str(self.resname))
 
     def add_video_event(self):
+        """
+        Adding new video evt
+        :return: None
+        """
         available_file_types = ['jpg', 'gif', 'jpeg', 'png']
         if not self.resname or not self.start_time or not self.stoptime:
             print('set start stop and res')
@@ -240,12 +275,20 @@ class VideoEventsMenu(QtGui.QWidget):
         self.clean_labels()
 
     def button_pushed(self, num, boxref):
+        """
+        Bushed button
+        :param num:
+        :param boxref:
+        """
         print('Pushed button {}'.format(num))
         self.controller.remove_model(num)
         self.layout.removeWidget(boxref)
         boxref.deleteLater()
 
     def clean_labels(self):
+        """
+        Cleaning labels after new video start
+        """
         self.start_lab.setText("Start: ")
         self.stop_lab.setText("stop_player: ")
         self.pos_lab.setText("Pos: ")
