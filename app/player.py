@@ -1,9 +1,10 @@
 import os.path
-from PyQt4 import QtGui, QtCore # pylint: disable=import-error
-from controller import VideoEventsController # pylint: disable=import-error
+from PyQt4 import QtGui, QtCore  # pylint: disable=import-error
+from controller import VideoEventsController  # pylint: disable=import-error
 from events import VideoEventsMenu
-import vlc # pylint: disable=import-error
+import vlc  # pylint: disable=import-error
 import sys
+
 
 class VideoFrame(QtGui.QWidget):
     def __init__(self):
@@ -174,8 +175,8 @@ class Player(QtGui.QMainWindow):
         """Open a media file in a MediaPlayer
         """
         if filename is None:
-            filename = QtGui.QFileDialog.getOpenFileName\
-                (self, "Open File", os.path.expanduser('~'))
+            filename = QtGui.QFileDialog.\
+                getOpenFileName(self, "Open File", os.path.expanduser('~'))
         if not filename:
             return
 
@@ -184,7 +185,7 @@ class Player(QtGui.QMainWindow):
         """
         if filename is None:
             dir = os.getcwd()
-            filename = QtGui.QFileDialog.getOpenFileName\
+            filename = QtGui.QFileDialog.getOpenFileName \
                 (self, "Open File", os.path.expanduser(dir))
         if not filename:
             return

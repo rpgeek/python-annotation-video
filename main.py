@@ -3,7 +3,7 @@
 from __future__ import print_function
 import sys
 
-from PyQt4 import QtGui # pylint: disable=import-error
+from PyQt4 import QtGui  # pylint: disable=import-error
 from app.player import Player
 
 if __name__ == "__main__":

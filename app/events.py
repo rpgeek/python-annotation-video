@@ -1,5 +1,10 @@
-from PyQt4 import QtGui, QtCore # pylint: disable=import-error
+import json
+import random
+from PyQt4 import QtGui, QtCore  # pylint: disable=import-error
 import os
+from shutil import copyfile
+from model import VideoEventModel
+
 
 class VideoEvtWidget(QtGui.QWidget):
     def __init__(self, vid_evt_mdl):
@@ -9,9 +14,11 @@ class VideoEvtWidget(QtGui.QWidget):
         layout.addWidget(self.label)
         self.setLayout(layout)
 
+
 def show_video_alert(layout, info="Video Error",
                      default_resp="There is no video resource to analyze"):
     QtGui.QMessageBox.about(layout, info, default_resp)
+
 
 class VideoEventsMenu(QtGui.QWidget):
     def __init__(self, eventsController):
@@ -89,7 +96,7 @@ class VideoEventsMenu(QtGui.QWidget):
 
         if len(self.models_list) == 0:
             return
-        filename = QtGui.QFileDialog.\
+        filename = QtGui.QFileDialog. \
             getSaveFileName(self, "Save File", os.path.expanduser(os.getcwd()))
 
         if len(filename) == 0:
@@ -163,7 +170,7 @@ class VideoEventsMenu(QtGui.QWidget):
             return
         print('set res')
         dir = os.getcwd()
-        fnamedir = QtGui.QFileDialog.\
+        fnamedir = QtGui.QFileDialog. \
             getOpenFileName(self, 'Open file', dir)
 
         if fnamedir == 0:
@@ -189,6 +196,7 @@ class VideoEventsMenu(QtGui.QWidget):
         self.res_lab.setText("Res: " + str(self.resname))
 
     def add_video_event(self):
+        available_file_types = ['jpg', 'gif', 'jpeg', 'png']
         if not self.resname or not self.start_time or not self.stoptime:
             print('set start stop and res')
             return
@@ -198,7 +206,7 @@ class VideoEventsMenu(QtGui.QWidget):
         id = random.randint(0, 2 ** 32 - 1)
 
         fileType = str(self.resname).split('.')[-1]
-        if fileType == 'jpg' or fileType == 'gif' or fileType == 'jpeg' or fileType == 'png':
+        if fileType in available_file_types:
             type = 'image'
         elif fileType == 'mp3' or fileType == 'wav' or fileType == 'ogg':
             type = 'audio'
@@ -223,7 +231,8 @@ class VideoEventsMenu(QtGui.QWidget):
         widg = QtGui.QWidget()
         widg.setLayout(box)
 
-        remove_btn.clicked.connect(lambda state, x=id: self.button_pushed(x, widg))
+        remove_btn.clicked.connect(lambda state, x=id:
+                                   self.button_pushed(x, widg))
 
         self.layout.addWidget(widg)
 
